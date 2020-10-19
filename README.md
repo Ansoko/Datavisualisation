@@ -1,5 +1,10 @@
 # DATAVIZ_2
 
-Salut les potes :)
+Rappel des commandes Git :
 
-yo !
+Ajouter : 
+git add -A
+git commit -m "nom de la modif"
+git push
+
+mettre à jour : git pull
