@@ -12,6 +12,7 @@ year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.c
 
 print(author.loc[author.name_author=='A. Andersson',])
 
+df = pd.DataFrame({'author':author, 'keyword':keyword}, index=[0])
 
 import matplotlib.pyplot as plt
 import networkx as nx
