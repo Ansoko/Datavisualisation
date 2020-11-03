@@ -12,15 +12,12 @@ year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.c
 
 print(author.loc[author.name_author=='A. Andersson',])
 
-<<<<<<< Updated upstream
-authordf = pd.DataFrame({'id_author':author.id_author,'name_author':author.name_author, 'nbr_publication':author.nbr_publication})
+#authordf = pd.DataFrame({'id_author':author.id_author,'name_author':author.name_author, 'nbr_publication':author.nbr_publication})
 
 
-publication_author_df = pd.merge(author, publication_author, on='id_author')
 #df = pd.merge(pd.merge(author, publication_author, on='id_author'),pd.merge(publication,publication_keywords, on='id_publication'),on='id_publication')
 #impossible car memory error
 
-=======
 #authordf = pd.DataFrame({'id_author':author.id_author,'name_author':author.name_author, 'nbr_publication':author.nbr_publication})
 
 #df = pd.merge(pd.merge(author, publication_author, on='id_author'),pd.merge(publication,publication_keywords, on='id_publication'),on='id_publication')
@@ -28,8 +25,7 @@ publication_author_df = pd.merge(author, publication_author, on='id_author')
 
 print("*Liste de toutes les publications d'un auteur*")
 nameAuthor = input("Entrez le nom d'un auteur : ")
-publication_author_df = pd.merge(author, publication_author, on='id_author')
-listIDPubliAuthor = publication_author_df.loc[publication_author_df.name_author==nameAuthor,]
-listPubliAuthor = pd.merge(listIDPubliAuthor, publication, on='id_publication')
-print(listPubliAuthor['article_title'])
->>>>>>> Stashed changes
+authorOnTable = author.loc[author.name_author==nameAuthor,]
+publication_author_df = pd.merge(authorOnTable, publication_author, on='id_author')
+listPubliAuthor = pd.merge(publication_author_df, publication, on='id_publication')
+print(listPubliAuthor.article_title.values)
