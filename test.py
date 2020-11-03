@@ -12,62 +12,10 @@ year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.c
 
 print(author.loc[author.name_author=='A. Andersson',])
 
-df = pd.DataFrame({'author':author, 'keyword':keyword}, index=[0])
-
-import matplotlib.pyplot as plt
-import networkx as nx
-
-G = nx.Graph()
-G.add_nodes_from([
-    (4, {"color": "red"}),
-    (5, {"color": "green"}),
-])
-H = nx.path_graph(10)
-G.add_nodes_from(H)
-nx.draw(G)
-plt.savefig("tuto.jpg")
-plt.close()
+authordf = pd.DataFrame({'id_author':author.id_author,'name_author':author.name_author, 'nbr_publication':author.nbr_publication})
 
 
-G = nx.Graph()
-G.add_edge(1, 2)
-e = (2, 3)
-G.add_edge(*e)  # unpack edge tuple*
-nx.draw(G)
-plt.savefig("tuto.jpg")
-plt.close()
+publication_author_df = pd.merge(author, publication_author, on='id_author')
+#df = pd.merge(pd.merge(author, publication_author, on='id_author'),pd.merge(publication,publication_keywords, on='id_publication'),on='id_publication')
+#impossible car memory error
 
-
-G = nx.grid_2d_graph(5, 5)  # 5x5 grid
-
-# print the adjacency list
-for line in nx.generate_adjlist(G):
-    print(line)
-# write edgelist to grid.edgelist
-nx.write_edgelist(G, path="grid.edgelist", delimiter=":")
-# read edgelist from grid.edgelist
-H = nx.read_edgelist(path="grid.edgelist", delimiter=":")
-nx.draw(H)
-plt.show()
-plt.savefig("filname.jpg")
-
-plt.close()
-
-G = nx.cycle_graph(24)
-pos = nx.spring_layout(G, iterations=200)
-nx.draw(G, pos, node_color=range(24), node_size=800, cmap=plt.cm.Blues)
-plt.show()
-plt.savefig("filname2.jpg")
-
-G = nx.star_graph(20)
-pos = nx.spring_layout(G)
-colors = range(20)
-options = {
-    "node_color": "#A0CBE2",
-    "edge_color": colors,
-    "width": 4,
-    "edge_cmap": plt.cm.Blues,
-    "with_labels": False,
-}
-nx.draw(G, pos, **options)
-plt.savefig("filname3.jpg")
