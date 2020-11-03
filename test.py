@@ -12,7 +12,6 @@ year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.c
 
 print(author.loc[author.name_author=='A. Andersson',])
 
-
 print("*Liste de toutes les publications d'un auteur*")
 nameAuthor = input("Entrez le nom d'un auteur : ")
 authorOnTable = author.loc[author.name_author==nameAuthor,]
@@ -27,3 +26,10 @@ publiOnTable = publication.loc[publication.article_title==namePubli,]
 publication_author_df = pd.merge(publiOnTable, publication_author, on='id_publication')
 listPubliAuthor = pd.merge(publication_author_df, author, on='id_author')
 print(listPubliAuthor.name_author.values)
+
+print("*Liste des keywords d'une publication*")
+namePubli = input("Entrez le titre d'une publication' : ")
+publiOnTable = publication.loc[publication.article_title==namePubli,]
+publication_keywords_df = pd.merge(publiOnTable, publication_keywords, on='id_publication')
+listKeywordPublic = pd.merge(publication_keywords_df, keyword, on='keyword')
+print(listKeywordPublic.keyword.values)
