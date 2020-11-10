@@ -35,7 +35,7 @@ publication_keywords_df = pd.merge(publiOnTable, publication_keyword, on='id_pub
 listKeywordPublic = pd.merge(publication_keywords_df, keyword, on='keyword')['keyword']
 print(listKeywordPublic.values)
 
-donnees = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword}
+
 #etiquette = {name_author,nbr_publication, date_pub,nbr_authors,article_title,categorie}
 
 
@@ -53,17 +53,33 @@ print(listEnd.values)
 
 
 #création de la requete dynamique
+donneesTable = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword}
+idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keyword}
+idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_venue', 'keyword':'keyword'}
     #name : nom de la cible (centre du graphe)
     #typename : type de la cible (author, publication, keyword...)
     #att1, att2, att3 : attribut aux niveau 1, 2 et 3 du graphe
-def request(name, typename, att1, att2, att3):
+    #typeAtt1, typeAtt2, typeAtt3 : type de ces attributs
+def request(name, typename, att1, typeAtt1, att2, typeAtt2, att3, typeAtt3):
     if typename=="author":
         table = author.loc[author.name_author==name,]
     elif typename=="publication":
         table = publication.loc[publication.article_title==name,]
+    elif typename == "keyword":
+        table = keyword.loc[keyword.keyword==name,]
+    elif typename == "venue":
+        table = venue.loc[venue.name_venue==name,]
     else:
         return "Erreur : le type d'entrée n'existe pas"
- 
+    
+    if att1 != "":
+        if typeAtt1!="publication":
+            table = pd.merge(table, idTable[typeAtt1], on='id_publication')
+        
+        table = pd.merge(table, donneesTable[typeAtt1],on=idName[typeAtt1])[att1]
+        
+    print(table.values)
 
 
-
+#request("'Yinka Oyerinde", "author", "article_title","publication","","","","")
+request("FEATS: Synthetic Feature Tracks for Structure from Motion Evaluation.","publication","name_author","author","","","","")
