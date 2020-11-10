@@ -62,9 +62,30 @@ def request(name, typename, att1, typeAtt1, att2, typeAtt2, att3, typeAtt3):
         else:
             table = pd.merge(table, idTable[typename], on=idName[typename])
         table = pd.merge(table, donneesTable[typeAtt1],on=idName[typeAtt1])
+    else:
+        return table
         
-    print(table[att1].values)
+    if att2 != "":
+        table = pd.merge(table, idTable[typeAtt2], on='id_publication')
+        table = pd.merge(table, donneesTable[typeAtt2], on=idName[typeAtt2])
+    else:
+        return table[[att1]]
+
+    if att3 != "":
+        table = pd.merge(table, idTable[typeAtt3], on='id_publication')
+        table = pd.merge(table, donneesTable[typeAtt3], on=idName[typeAtt3])
+    else:
+        return table[[att1, att2]]
+    
+    return table[[att1, att2, att3]]
+        
+
+request("'Yinka Oyerinde", "author", "","","","","","")
+print(request("'Yinka Oyerinde", "author", "article_title","publication","","","",""))
+print(request("FEATS: Synthetic Feature Tracks for Structure from Motion Evaluation.","publication","name_author","author","","","",""))
+print(request("'Yinka Oyerinde", "author", "article_title","publication","keyword","keyword","",""))
 
 
-request("'Yinka Oyerinde", "author", "article_title","publication","","","","")
-request("FEATS: Synthetic Feature Tracks for Structure from Motion Evaluation.","publication","name_author","author","","","","")
+#['id_author', 'name_author', 'nbr_publication', 'id_publication',
+        #'date_pub', 'nbr_authors', 'article_title', 'categorie', 'keyword',
+        #'nbr_use_keyword', 'nbr_used']
