@@ -45,9 +45,25 @@ objcat = input("Entrez le nom de la varible que vous cherchez (si c'est le nom d
 obj = input("Entrez la catégorie de cet objet (publication, author, keyword, venue) :")
 x = input("Entrez l'étiquette de la liste que vous voulez afficher (name_author, article_title, keyword...) : ")
 objx = input("Entrez la catégorie de cet objet (publication, author, keyword, venue) :")
-etiquette={'article_title':donnees[obj].article_title==y}
+etiquette={'article_title':donnees[obj].article_title==y} #uniquement pour un nom d'article pour l'instant
 onTable = donnees[obj].loc[etiquette[objcat],]
 dfMerge = pd.merge(onTable, publication_keyword, on='id_publication')
 listEnd = (pd.merge(dfMerge, donnees[objx], on=x))[objx]
 print(listEnd.values)
+
+
+#création de la requete dynamique
+    #name : nom de la cible (centre du graphe)
+    #typename : type de la cible (author, publication, keyword...)
+    #att1, att2, att3 : attribut aux niveau 1, 2 et 3 du graphe
+def request(name, typename, att1, att2, att3):
+    if typename=="author":
+        table = author.loc[author.name_author==name,]
+    elif typename=="publication":
+        table = publication.loc[publication.article_title==name,]
+    else:
+        return "Erreur : le type d'entrée n'existe pas"
+ 
+
+
 
