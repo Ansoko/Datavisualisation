@@ -36,22 +36,6 @@ listKeywordPublic = pd.merge(publication_keywords_df, keyword, on='keyword')['ke
 print(listKeywordPublic.values)
 
 
-#etiquette = {name_author,nbr_publication, date_pub,nbr_authors,article_title,categorie}
-
-
-print("*Liste des x de y*")
-y = input("Entrez l'objet de votre recherche (nom d'une publication, nom d'un auteur, nom d'un évènement...'): ")
-objcat = input("Entrez le nom de la varible que vous cherchez (si c'est le nom d'un auteur, c'est name_author par ex) :")
-obj = input("Entrez la catégorie de cet objet (publication, author, keyword, venue) :")
-x = input("Entrez l'étiquette de la liste que vous voulez afficher (name_author, article_title, keyword...) : ")
-objx = input("Entrez la catégorie de cet objet (publication, author, keyword, venue) :")
-etiquette={'article_title':donnees[obj].article_title==y} #uniquement pour un nom d'article pour l'instant
-onTable = donnees[obj].loc[etiquette[objcat],]
-dfMerge = pd.merge(onTable, publication_keyword, on='id_publication')
-listEnd = (pd.merge(dfMerge, donnees[objx], on=x))[objx]
-print(listEnd.values)
-
-
 #création de la requete dynamique
 donneesTable = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword}
 idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keyword}
@@ -75,11 +59,12 @@ def request(name, typename, att1, typeAtt1, att2, typeAtt2, att3, typeAtt3):
     if att1 != "":
         if typeAtt1!="publication":
             table = pd.merge(table, idTable[typeAtt1], on='id_publication')
+        else:
+            table = pd.merge(table, idTable[typename], on=idName[typename])
+        table = pd.merge(table, donneesTable[typeAtt1],on=idName[typeAtt1])
         
-        table = pd.merge(table, donneesTable[typeAtt1],on=idName[typeAtt1])[att1]
-        
-    print(table.values)
+    print(table[att1].values)
 
 
-#request("'Yinka Oyerinde", "author", "article_title","publication","","","","")
+request("'Yinka Oyerinde", "author", "article_title","publication","","","","")
 request("FEATS: Synthetic Feature Tracks for Structure from Motion Evaluation.","publication","name_author","author","","","","")
