@@ -36,15 +36,17 @@ listKeywordPublic = pd.merge(publication_keywords_df, keyword, on='keyword')['ke
 print(listKeywordPublic.values)
 
 
+
+
 #création de la requete dynamique
 donneesTable = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword}
-idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keyword}
+idTable = {'author': publication_author, 'venue':publication_venue, 'keyword':publication_keyword}
 idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_venue', 'keyword':'keyword'}
     #name : nom de la cible (centre du graphe)
     #typename : type de la cible (author, publication, keyword...)
     #att1, att2, att3 : attribut aux niveau 1, 2 et 3 du graphe
     #typeAtt1, typeAtt2, typeAtt3 : type de ces attributs
-def request(name, typename, att1, typeAtt1, att2, typeAtt2, att3, typeAtt3):
+def request(name, typename, attribute, typeAtt):
     if typename=="author":
         table = author.loc[author.name_author==name,]
     elif typename=="publication":
@@ -56,36 +58,29 @@ def request(name, typename, att1, typeAtt1, att2, typeAtt2, att3, typeAtt3):
     else:
         return "Erreur : le type d'entrée n'existe pas"
     
-    if att1 != "":
-        if typeAtt1!="publication":
-            table = pd.merge(table, idTable[typeAtt1], on='id_publication')
-        else:
-            table = pd.merge(table, idTable[typename], on=idName[typename])
-        table = pd.merge(table, donneesTable[typeAtt1],on=idName[typeAtt1])
-    else:
-        return table
-        
-    if att2 != "":
-        table = pd.merge(table, idTable[typeAtt2], on='id_publication')
-        table = pd.merge(table, donneesTable[typeAtt2], on=idName[typeAtt2])
-    else:
-        return table[[att1]]
+    table = pd.merge(table, idTable[typename], on=idName[typename])
+    typeAtt.discard(typename)
+    for typ in typeAtt:
+        if typ!="publication":
+            table = pd.merge(table, idTable[typ], on='id_publication') 
+        table = pd.merge(table, donneesTable[typ],on=idName[typ])
 
-    if att3 != "":
-        table = pd.merge(table, idTable[typeAtt3], on='id_publication')
-        table = pd.merge(table, donneesTable[typeAtt3], on=idName[typeAtt3])
-    else:
-        return table[[att1, att2]]
-    
-    return table[[att1, att2, att3]]
+    return table[attribute].values
         
 
-request("'Yinka Oyerinde", "author", "","","","","","")
-print(request("'Yinka Oyerinde", "author", "article_title","publication","","","",""))
-print(request("FEATS: Synthetic Feature Tracks for Structure from Motion Evaluation.","publication","name_author","author","","","",""))
-print(request("'Yinka Oyerinde", "author", "article_title","publication","keyword","keyword","",""))
+att = ['name_author', 'article_title', 'date_pub']
+typeAtt = {'author','publication','publication'}
+request("'Yinka Oyerinde", "author", att, typeAtt)
 
+att = ['name_author']
+typeAtt={'author'}
+request("FEATS: Synthetic Feature Tracks for Structure from Motion Evaluation.","publication",att, typeAtt)
+
+att = ['name_author','keyword']
+typeAtt={'author','keyword'}
+request("'Yinka Oyerinde", "author", att, typeAtt)
 
 #['id_author', 'name_author', 'nbr_publication', 'id_publication',
         #'date_pub', 'nbr_authors', 'article_title', 'categorie', 'keyword',
         #'nbr_use_keyword', 'nbr_used']
+        
