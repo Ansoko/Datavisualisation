@@ -10,42 +10,14 @@ publication_year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/da
 venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/venue.csv", engine='python', error_bad_lines=False)
 year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.csv", engine='python', error_bad_lines=False)
 
-print(author.loc[author.name_author=='A. Andersson',])
-
-print("*Liste de toutes les publications d'un auteur*")
-nameAuthor = input("Entrez le nom d'un auteur : ")
-authorOnTable = author.loc[author.name_author==nameAuthor,]
-publication_author_df = pd.merge(authorOnTable, publication_author, on='id_author')
-listPubliAuthor = pd.merge(publication_author_df, publication, on='id_publication')
-print(listPubliAuthor.article_title.values)
-
-
-print("*Liste de tous les co-auteurs d'une publication*")
-namePubli = input("Entrez le titre d'une publication : ")
-publiOnTable = publication.loc[publication.article_title==namePubli,]
-publication_author_df = pd.merge(publiOnTable, publication_author, on='id_publication')
-listPubliAuthor = pd.merge(publication_author_df, author, on='id_author')
-print(listPubliAuthor.name_author.values)
-
-
-print("*Liste des keywords d'une publication*")
-namePubli = input("Entrez le titre d'une publication : ")
-publiOnTable = publication.loc[publication.article_title==namePubli,]
-publication_keywords_df = pd.merge(publiOnTable, publication_keyword, on='id_publication')
-listKeywordPublic = pd.merge(publication_keywords_df, keyword, on='keyword')['keyword']
-print(listKeywordPublic.values)
-
-
-
-
-#création de la requete dynamique
+#requete dynamique
 donneesTable = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword}
-idTable = {'author': publication_author, 'venue':publication_venue, 'keyword':publication_keyword}
+idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keyword}
 idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_venue', 'keyword':'keyword'}
     #name : nom de la cible (centre du graphe)
-    #typename : type de la cible (author, publication, keyword...)
-    #att1, att2, att3 : attribut aux niveau 1, 2 et 3 du graphe
-    #typeAtt1, typeAtt2, typeAtt3 : type de ces attributs
+    #typename : type de la cible (author, publication, keyword, venue)
+    #attribute : liste d'attributs à afficher
+    #typeAtt : ensemble des types de ces attributs
 def request(name, typename, attribute, typeAtt):
     if typename=="author":
         table = author.loc[author.name_author==name,]
@@ -68,6 +40,8 @@ def request(name, typename, attribute, typeAtt):
     return table[attribute].values
         
 
+
+#tests d'appels
 att = ['name_author', 'article_title', 'date_pub']
 typeAtt = {'author','publication','publication'}
 request("'Yinka Oyerinde", "author", att, typeAtt)
