@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy
 
 author = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/author.csv", encoding= 'unicode_escape', engine='python', error_bad_lines=False)
 
@@ -137,12 +138,106 @@ intro(Firstname="John", Lastname="Wood", Email="johnwood@nomail.com", Country="W
 ################################
 
 # Faire le zoom sur un seul "auteur principal"
-# Faire des noeuds "co-auteur" reliés à cette "auteur principal" (via une boucle for ?)
+# Faire des noeuds "co-auteur" reliés à cet "auteur principal" (via une boucle for ?)
 # Chaque noeud "publication" qui part de "co-auteur" est donc indirectement relié à "auteur principale"
 # Dans le label du noeud, il faudra préciser si co-écrit ? 
 #(donc dans la boucle qui relie "co-auteur" et "publication")
 # Comme ça, on pourra distinguer si les noeuds reliés à auteur principal sont des co-auteurs ou des publications
 # Peut-être même nommer les arguments à l'appel de la fonction (G = G, auteur = "auteur1", publications....)
+# Les noeuds des co-auteur seront d'une autre couleur que celui des articles et de l'auteur principal
+author = pd.read_csv("D:/Travail/Master 1/Projet intégré/DATAVIZ_2/author.csv", 
+                    engine='python', error_bad_lines=False)
+print(author.head(10))
+print(author.info())
+
+publication = pd.read_csv("D:/Travail/Master 1/Projet intégré/DATAVIZ_2/publication.csv", 
+                          engine='python', error_bad_lines=False)
+print(publication.head(10))
+print(publication.info())
+
+publication_author = pd.read_csv("D:/Travail/Master 1/Projet intégré/DATAVIZ_2/publication_author.csv", 
+                                 engine='python', error_bad_lines=False)
+print(publication_author.head(10))
+print(publication_author.info())
+
+
+# On récupère l'id de l'auteur envoyé en argument (via le champ de texte de l'interface par exemple)
+def get_id_author(name):
+    a = list(author.id_author[author.name_author == name])
+    return a[0]
+
+# Puis on essaye de trouver les id de publications affiliés à l'auteur précédent
+# On veut donc entrer un id d'auteur et sortir une liste des id de toutes ses publications
+def get_id_publication(idAuthor):
+    return list(publication_author.id_publication[publication_author.id_author == idAuthor])
+
+# On récupère le nom de tous les articles à partir des id de publication d'un auteur
+def get_name_publication(list_Publication):
+    ls = list()
+    for i in list_Publication :
+        a = list(publication.article_title[publication.id_publication == i])
+        ls.append(a[0])
+    return ls
+
+
+#idAuthor = get_id_author("A Min Tjoa") # 1 publication
+idAuthor = get_id_author("A Min Tjoa") # A Min Tjoa       id_t/AMinTjoa
+print("idAuthor : " + str(idAuthor))
+
+listPublications = get_id_publication(idAuthor)
+
+listPublications = get_id_publication("id_56/11306")
+listPublications = get_id_publication("id_43/3031")
+
+print("listPublications : " + str(listPublications))
+
+listNamePublications = get_name_publication(listPublications)
+print("listNamePublications : " + str(listNamePublications))
+
+
+# Permet de récupérer la liste des titre d'article d'un auteur
+authorName = "A Min Tjoa"
+listNamePublications = get_name_publication(get_id_publication(get_id_author(authorName)))
+print("listNamePublications : " + str(listNamePublications))
+
+
+def addNodes(G, *nodes):
+    for arg in nodes:
+        G.add_node(arg)
+        
+    nx.draw(G, with_labels=True)
+    plt.show() # display
+
+# Ex. afficherPublicationAuteur(G, "nom auteur", *publications)
+# *publications étant toutes les publications de l'auteur qu'on veut afficher
+# Il faudra alors relier l'auteur à toutes les publications (1 unique auteur pour l'instant)
+# def afficherPublicationsAuteur(G, auteur, *publications):
+#     G.add_node(auteur)
+    
+#     for arg in publications:
+#         G.add_node(arg)
+#         G.add_edge(auteur,arg)
+        
+#     nx.draw(G, with_labels=True)
+#     plt.show() # display
+
+
+# G = nx.Graph()    
+#afficherPublicationsAuteur(G, authorName, "publi1", "publi2", "publi3")
+
+def afficherPublicationsAuteur(G, auteur, publications):
+    G.add_node(auteur)
+    
+    for arg in publications:
+        G.add_node(arg)
+        G.add_edge(auteur,arg)
+        
+    nx.draw(G, with_labels=True)
+    plt.show() # display
+
+G = nx.Graph()       
+afficherPublicationsAuteur(G, authorName, listNamePublications)
+
 
 
 
