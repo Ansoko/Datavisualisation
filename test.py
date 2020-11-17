@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy
+import numpy as np
 
 author = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/author.csv", encoding= 'unicode_escape', engine='python', error_bad_lines=False)
 
@@ -17,6 +17,8 @@ os.chdir('D:/Travail/Master 1/Projet intégré/DATAVIZ_2')
 
 import networkx as nx
 import matplotlib.pyplot as plt
+plt.ion() # "Turn the interactive mode on."
+import netgraph
 
 G=nx.Graph()
 
@@ -179,6 +181,12 @@ def get_name_publication(list_Publication):
         ls.append(a[0])
     return ls
 
+def get_date_publication(list_Publication):
+    ls = list()
+    for i in list_Publication :
+        a = list(publication.date_pub[publication.id_publication == i])
+        ls.append(a[0])
+    return ls
 
 #idAuthor = get_id_author("A Min Tjoa") # 1 publication
 idAuthor = get_id_author("A Min Tjoa") # A Min Tjoa       id_t/AMinTjoa
@@ -198,6 +206,7 @@ print("listNamePublications : " + str(listNamePublications))
 # Permet de récupérer la liste des titre d'article d'un auteur
 authorName = "A Min Tjoa"
 listNamePublications = get_name_publication(get_id_publication(get_id_author(authorName)))
+listDatePublications = get_date_publication(get_id_publication(get_id_author(authorName)))
 print("listNamePublications : " + str(listNamePublications))
 
 
@@ -236,11 +245,79 @@ def afficherPublicationsAuteur(G, auteur, publications):
     plt.show() # display
 
 G = nx.Graph()       
-afficherPublicationsAuteur(G, authorName, listNamePublications)
+afficherPublicationsAuteur(G, authorName, listNamePublications) # Afficher le titre des publications
+
+G = nx.Graph()       
+afficherPublicationsAuteur(G, authorName, listDatePublications) # Afficher la date des publications
+
+# Afficher le nom du nom avec le mouse over
+import networkx as nx
+from bokeh.io import output_file, show
+from bokeh.models import (BoxZoomTool, Circle, HoverTool, MultiLine, Plot, Range1d, ResetTool,)
+from bokeh.palettes import Spectral4
+from bokeh.plotting import from_networkx
+
+plot = Plot(plot_width=400, plot_height=400, x_range=Range1d(-1.1, 1.1), y_range=Range1d(-1.1, 1.1))
+plot.title.text = "Graphe intéractif"
+node_hover_tool = HoverTool(tooltips=[("Test", "@index"), ("club", "@club"), ("Test2", "@test2")])
+plot.add_tools(node_hover_tool, BoxZoomTool(), ResetTool())
+graph_renderer = from_networkx(G, nx.spring_layout, scale=1, center=(0, 0))
+plot.renderers.append(graph_renderer)
+output_file("interactive_graphs.html")
+show(plot)
+# Pouvoir afficher les titres d'articles que sui on passe le curseur sur le noeud de l'article
 
 
+def test(G, auteur, publications):
+    G.add_node(auteur)
+    
+    for arg in publications:
+        G.add_node(arg)
+        G.add_edge(auteur,arg)
+        
+    #nx.draw(G, with_labels=True)
+    netgraph.draw(graph)
+    plot_instance = netgraph.InteractiveGraph(graph)
+    plt.show() # display
 
 
+graph = nx.Graph()       
+test(graph, authorName, listDatePublications)
 
 
+import networkx as nx
+
+from bokeh.io import output_file, show
+from bokeh.models import (BoxZoomTool, Circle, HoverTool,
+                          MultiLine, Plot, Range1d, ResetTool,)
+from bokeh.palettes import Spectral4
+from bokeh.plotting import from_networkx
+
+# Prepare Data
+G = nx.karate_club_graph()
+
+SAME_CLUB_COLOR, DIFFERENT_CLUB_COLOR = "black", "red"
+edge_attrs = {}
+
+for start_node, end_node, _ in G.edges(data=True):
+    edge_color = SAME_CLUB_COLOR if G.nodes[start_node]["club"] == G.nodes[end_node]["club"] else DIFFERENT_CLUB_COLOR
+    edge_attrs[(start_node, end_node)] = edge_color
+
+nx.set_edge_attributes(G, edge_attrs, "edge_color")
+
+# Show with Bokeh
+plot = Plot(plot_width=400, plot_height=400,
+            x_range=Range1d(-1.1, 1.1), y_range=Range1d(-1.1, 1.1))
+plot.title.text = "Graph Interaction Demonstration"
+
+node_hover_tool = HoverTool(tooltips=[("Test", "@index"), ("club", "@club"), ("Test2", "@test2")])
+plot.add_tools(node_hover_tool, BoxZoomTool(), ResetTool())
+
+graph_renderer = from_networkx(G, nx.spring_layout, scale=1, center=(0, 0))
+
+graph_renderer.node_renderer.glyph = Circle(size=15, fill_color=Spectral4[0])
+graph_renderer.edge_renderer.glyph = MultiLine(line_color="edge_color", line_alpha=0.8, line_width=1)
+plot.renderers.append(graph_renderer)
+output_file("interactive_graphs.html")
+show(plot)
 
