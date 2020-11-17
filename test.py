@@ -253,14 +253,14 @@ afficherPublicationsAuteur(G, authorName, listDatePublications) # Afficher la da
 # Afficher le nom du nom avec le mouse over
 import networkx as nx
 from bokeh.io import output_file, show
-from bokeh.models import (BoxZoomTool, Circle, HoverTool, MultiLine, Plot, Range1d, ResetTool,)
+from bokeh.models import (PanTool, SaveTool, BoxZoomTool, WheelZoomTool, Circle, HoverTool, MultiLine, Plot, Range1d, ResetTool,)
 from bokeh.palettes import Spectral4
 from bokeh.plotting import from_networkx
 
 plot = Plot(plot_width=400, plot_height=400, x_range=Range1d(-1.1, 1.1), y_range=Range1d(-1.1, 1.1))
 plot.title.text = "Graphe intéractif"
-node_hover_tool = HoverTool(tooltips=[("Test", "@index"), ("club", "@club"), ("Test2", "@test2")])
-plot.add_tools(node_hover_tool, BoxZoomTool(), ResetTool())
+node_hover_tool = HoverTool(tooltips=[("Titre", "@index"), ("Date", "@date")]) # exemple : (tooltips=[("Test", "@index"), ("club", "@club"), ("Test2", "@test2")])
+plot.add_tools(node_hover_tool, PanTool(), WheelZoomTool(), BoxZoomTool(), ResetTool(), SaveTool())
 graph_renderer = from_networkx(G, nx.spring_layout, scale=1, center=(0, 0))
 plot.renderers.append(graph_renderer)
 output_file("interactive_graphs.html")
