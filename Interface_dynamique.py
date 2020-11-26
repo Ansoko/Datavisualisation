@@ -56,15 +56,15 @@ def request(name, typename, attribute, typeAtt):
         
     for i in range(len(typename)):
         if typename[i]=="author":
-            cible = table.loc[table.name_author==name[i],]
+            table = table.loc[table.name_author==name[i],]
         elif typename[i]=="publication":
-            cible = table.loc[table.article_title==name[i],]
+            table = table.loc[table.article_title==name[i],]
         elif typename[i] == "keyword":
-            cible = table.loc[table.keyword==name[i],]
+            table = table.loc[table.keyword==name[i],]
         elif typename[i]== "venue":
-            cible = table.loc[table.name_venue==name[i],]
+            table = table.loc[table.name_venue==name[i],]
         elif typename[i] == "year":
-            cible = table.loc[table.year==int(name[i]),]
+            table = table.loc[table.year==int(name[i]),]
         else:
             print("Erreur : le type d'entrée n'existe pas")
         #print(cible)
@@ -72,9 +72,9 @@ def request(name, typename, attribute, typeAtt):
         #table = pd.merge(table, cible, on='id_publication')
         #typeAtt.discard(typename[i])
 
-    return cible[attribute].values
+    return table[attribute].values
 
-print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "year"], {"publication", "year"}))
+#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "year"], {"publication", "year"}))
 
 
 #Fonction déclenchée par le bouton valider. Va lancer la recherche sur le 1er champ rempli
@@ -84,20 +84,18 @@ def btn_entree_valider():
     if ZonedeT_publi.get():
         name.append(ZonedeT_publi.get())
         typename.append("publication")
-    elif ZonedeT_author.get():
+    if ZonedeT_author.get():
         name.append(ZonedeT_author.get())
         typename.append("author")
-    elif ZonedeT_keyword.get():
+    if ZonedeT_keyword.get():
         name.append(ZonedeT_keyword.get())
         typename.append("keyword")
-    elif ZonedeT_venue.get():
+    if ZonedeT_venue.get():
         name.append(ZonedeT_venue.get())
         typename.append("venue")
-    elif ZonedeT_year.get():
+    if ZonedeT_year.get():
         name.append(ZonedeT_year.get())
         typename.append("year")
-    else:
-        print("Vous n'avez rien entré")
     att=[]
     typeAtt = set()
     set_att_typeAtt_from_intf(att, typeAtt)
