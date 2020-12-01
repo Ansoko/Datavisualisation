@@ -67,10 +67,13 @@ def request(name, typename, attribute, typeAtt):
             table = table.loc[table.year==int(name[i]),]
         else:
             print("Erreur : le type d'entrée n'existe pas")
+<<<<<<< Updated upstream
         #print(cible)
         #cible = pd.merge(cible, idTable[typename[0]], on=idName[typename[0]])
         #table = pd.merge(table, cible, on='id_publication')
         #typeAtt.discard(typename[i])
+=======
+>>>>>>> Stashed changes
 
     return table[attribute].values
 
