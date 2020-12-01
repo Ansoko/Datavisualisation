@@ -2,7 +2,7 @@
 """
 Created on Wed Nov 11 16:33:45 2020
 
-@author: david
+@author: david, anne-sophie
 """
 import pandas as pd
 from tkinter import Tk,Label,Button, Entry,IntVar,Checkbutton, Canvas
@@ -53,25 +53,30 @@ def request(name, typename, attribute, typeAtt):
         if typ!="publication":
             table = pd.merge(table, idTable[typ], on='id_publication') 
         table = pd.merge(table, donneesTable[typ],on=idName[typ])
+        if (typ in typename):
+            del typename[typename.index(typ)]
+            del name[typename.index(typ)]
         
     for i in range(len(typename)):
         if typename[i]=="author":
-            table = table.loc[table.name_author==name[i],]
+            val = author.loc[author.name_author==name[i],]
         elif typename[i]=="publication":
-            table = table.loc[table.article_title==name[i],]
+            val = publication.loc[publication.article_title==name[i],]
         elif typename[i] == "keyword":
-            table = table.loc[table.keyword==name[i],]
+            val = keyword.loc[keyword.keyword==name[i],]
         elif typename[i]== "venue":
-            table = table.loc[table.name_venue==name[i],]
+            val = venue.loc[venue.name_venue==name[i],]
         elif typename[i] == "year":
-            table = table.loc[table.year==int(name[i]),]
+            val = year.loc[year.year==int(name[i]),]
         else:
             print("Erreur : le type d'entrée n'existe pas")
+        table = pd.merge(table, idTable[typename[i]], on='id_publication')
+        table = pd.merge(table, val, on=idName[typename[i]])
 
     return table[attribute].values
 
-print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "year"], {"publication", "year"}))
-
+#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub"], {"publication"}))
+#print(request(["Sebastian Rudolph", "2018"], ["author", "year"], ["keyword"], {"keyword"}))
 
 def btn_entree_valider():
     name=[]
