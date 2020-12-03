@@ -48,7 +48,6 @@ G = nx.Graph()
 def afficher_graph_publications_datespubs():
     pos_publication = nx.random_layout(GraphPublication)
     colors = []
-    labels = {}
     for node in GraphPublication:
         if node in publication_head["id_publication"].values:            
             colors.append("red") 

@@ -46,22 +46,22 @@ def add_edge(x, y, width):
 def afficher_Graph(nom_auteur,dataframe):
     dataset = dataframe
     #cols = dataframe.values
-    #cols = list()
-    #cols = dataset.columns.tolist()
+    cols = list()
+    cols = dataset.columns.tolist()
     center_node = nom_auteur
     
     nbr_nodes = len(dataset)
     
     nodes_title = [nbr for nbr in range(nbr_nodes)]
     
-    node_w = 5
+    node_w = 10
 
-    Graph = nx.random_geometric_graph(200,0.50)
-    Graph.add_node(center_node, size = 50) 
+    Graph = nx.Graph()
+    Graph.add_node(center_node, size = 20) 
 
     for i in range(len(nodes_title)):
         Graph.add_node(nodes_title[i], size = node_w)
-        Graph.add_edge(center_node, nodes_title[i], weight = node_w)
+        Graph.add_edge(center_node, nodes_title[i], width = node_w)
     
     pos = nx.spring_layout(Graph)
 
@@ -74,7 +74,7 @@ def afficher_Graph(nom_auteur,dataframe):
         current_trace = add_edge(
 								[x0, x1, None],
 								[y0, y1, None],
-								width = 1
+								width = 5
 								)
 
         edge_trace.append(current_trace)
@@ -84,7 +84,7 @@ def afficher_Graph(nom_auteur,dataframe):
                         	y				= [],
                         	text      		= [],
                         	textposition	= "top center",
-                        	textfont_size	=   10,
+                        	textfont_size	=   20,
                         	hoverinfo		= 'text',
 							mode			= 'markers',
 							marker		= dict(color	= [],
@@ -100,18 +100,19 @@ def afficher_Graph(nom_auteur,dataframe):
     
     for node in Graph.nodes():
         text = ""
-        for i in range(len(dataset)):
-            text += dataset[i]
+        for i in range(len(dataset.columns)):
+            #text += dataset[i]
+           text += "{0}:{1},".format(dataset.columns[i],dataset[cols[i]].iloc[info])
         hover_text = ""
 		
         if(node == center_node):
             hover_text = tuple(["{0}".format(center_node)])
             color = tuple(['yellow'])
-            size = (5,5,5)
+            size = tuple([2 * Graph.nodes[node]['size']])
         else:
             hover_text = tuple([text])
             color = tuple(['blue'])
-            size = (5,5,5)
+            size = tuple([2 * Graph.nodes[node]['size']])
 		
         x, y = pos[node]
         node_trace['x'] += tuple([x])
@@ -142,7 +143,7 @@ def afficher_Graph(nom_auteur,dataframe):
     # creation de la figure du layout 
     fig = go.Figure(layout = layout)
     fig.update_layout(
-    hover_text=dict(
+    hoverlabel=dict(
         font_size=10,
         font_family="Rockwell"
     )
