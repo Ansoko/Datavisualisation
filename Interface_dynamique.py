@@ -2,10 +2,10 @@
 """
 Created on Wed Nov 11 16:33:45 2020
 
-@author: david
+@author: david, anne-sophie
 """
 import pandas as pd
-from tkinter import Tk,Label,Button, Entry,IntVar,Checkbutton
+from tkinter import Tk,Label,Button, Entry,IntVar,Checkbutton, Canvas
 
 #importation fichiers CSV
 author = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/author.csv", engine='python', error_bad_lines=False)
@@ -30,6 +30,7 @@ idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_ve
     #typeAtt : ensemble des types de ces attributs
 def request(name, typename, attribute, typeAtt):
     
+    #Recherche de la ligne correspondante à la première valeur de recherche
     if typename[0]=="author":
         table = author.loc[author.name_author==name[0],]
     elif typename[0]=="publication":
@@ -43,41 +44,46 @@ def request(name, typename, attribute, typeAtt):
     else:
         return print("Erreur : le type d'entrée n'existe pas")
     
+    #Association avec la table ID
     table = pd.merge(table, idTable[typename[0]], on=idName[typename[0]])
+
+    #Suppression du nom de la table dans les différentes listes. Cela évitera de rechercher les valeurs dans les tables.
     typeAtt.discard(typename[0])
     del typename[0]
     del name[0]
     
-    #enfin, on merge les lignes correspondantes à la recherche
+    #Merge cette ligne avec les tables correspondantes à la recherche
     for typ in typeAtt:
         if typ!="publication":
             table = pd.merge(table, idTable[typ], on='id_publication') 
         table = pd.merge(table, donneesTable[typ],on=idName[typ])
+        if (typ in typename):
+            del typename[typename.index(typ)]
+            del name[typename.index(typ)]
         
+    #Séléction plus précise des données avec les autres valeurs de recherche (s'il y en a plus que 1)
     for i in range(len(typename)):
         if typename[i]=="author":
-            table = table.loc[table.name_author==name[i],]
+            val = author.loc[author.name_author==name[i],]
         elif typename[i]=="publication":
-            table = table.loc[table.article_title==name[i],]
+            val = publication.loc[publication.article_title==name[i],]
         elif typename[i] == "keyword":
-            table = table.loc[table.keyword==name[i],]
+            val = keyword.loc[keyword.keyword==name[i],]
         elif typename[i]== "venue":
-            table = table.loc[table.name_venue==name[i],]
+            val = venue.loc[venue.name_venue==name[i],]
         elif typename[i] == "year":
-            table = table.loc[table.year==int(name[i]),]
+            val = year.loc[year.year==int(name[i]),]
         else:
             print("Erreur : le type d'entrée n'existe pas")
-        #print(cible)
-        #cible = pd.merge(cible, idTable[typename[0]], on=idName[typename[0]])
-        #table = pd.merge(table, cible, on='id_publication')
-        #typeAtt.discard(typename[i])
+        table = pd.merge(table, idTable[typename[i]], on='id_publication')
+        table = pd.merge(table, val, on=idName[typename[i]])
 
+    #retour des attributs demandés
     return table[attribute].values
 
-#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "year"], {"publication", "year"}))
+#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "keyword"], {"publication", "keyword"}))
+#print(request(["Sebastian Rudolph", "2018"], ["author", "year"], ["keyword"], {"keyword"}))
 
-
-#Fonction déclenchée par le bouton valider. Va lancer la recherche sur le 1er champ rempli
 def btn_entree_valider():
     name=[]
     typename=[]
@@ -134,119 +140,117 @@ def set_att_typeAtt_from_intf(att,typeAtt):
 
 ##### Fenetre principale avec ces caractéristiques
 fenetre = Tk()
-fenetre.geometry('620x530')
-#fenetre.configure(bg='grey')
-#fenetre['bg'] = '#2ecc71'
 fenetre.title("Recherche utilisateur")
+canvas = Canvas(fenetre, width = 700, height = 580)
+canvas.pack(fill = "both", expand =True)
 
-#####Titre des inputbox
+
+##### Titre des des zones de textes
 label_publi = Label(fenetre, text="Titre publication  ",fg = "DodgerBlue4",font = ("Arial", 10 , "bold"))
-label_publi.grid(row=1,column=0)
+label_publi.place(x=50,y= 70)
 
 label_author = Label(fenetre, text="Nom auteur  ",fg = "DodgerBlue4",font = ("Arial", 10, "bold"))
-label_author.grid(row=2,column=0)
+label_author.place(x=50,y= 90)
 
 label_keyword = Label(fenetre, text="Mot-clé  ",fg = "DodgerBlue4",font = ("Arial", 10, "bold"))
-label_keyword.grid(row=3,column=0)
+label_keyword.place(x=50,y= 110)
 
 label_venue = Label(fenetre, text="Lieu  ",fg = "DodgerBlue4",font = ("Arial", 10, "bold"))
-label_venue.grid(row=4,column=0)
+label_venue.place(x=50,y= 130)
 
 label_year = Label(fenetre, text="Année  ",fg = "DodgerBlue4",font = ("Arial", 10, "bold"))
-label_year.grid(row=5,column=0)
-fenetre.grid_rowconfigure(6, minsize=10)
-
-Indic_crit = Label(fenetre, text="Taper ce que vous souahitez chercher ",fg = "red2",font = ("Arial", 9 , "bold"))
-Indic_crit.grid(row=0,column=0)
+label_year.place(x=50,y= 150)
 
 
-Indic_uti = Label(fenetre, text="Choisisser ce que vous voulez afficher  ",fg = "red2",font = ("Arial", 9 , "bold"))
-Indic_uti.grid(row=8,column=0)
+Indic_crit = Label(fenetre, text="Interface Utilisateur DATAVIZ 2 ",fg = "red2",font = ("Arial", 18 , "bold"))
+Indic_crit.place(x=190,y= 0)
+
+
+Indic_uti = Label(fenetre, text="Choisissez ce que vous voulez afficher  ",fg = "red2",font = ("Arial", 9 , "bold"))
+Indic_uti.place(x=10,y=200)
 Indic_uti = Label(fenetre, text="en cochant les cases ci-dessous  ",fg = "red2",font = ("Arial", 9 , "bold"))
-Indic_uti.grid(row=9,column=0)
-fenetre.grid_rowconfigure(7, minsize=10)
+Indic_uti.place(x=10,y= 220)
+#fenetre.grid_rowconfigure(7, minsize=10)
 
-##### Zone de texte pour les publications / Auteurs / Keyword
-#Entrée de mots_clefs et nom
+##### Zone de texte pour les publications/auteurs/keywords/venues/years 
 ZonedeT_publi = Entry(fenetre, width=30)
-ZonedeT_publi.grid(row=1,column=1)
+ZonedeT_publi.place(x=300,y= 70)
 
 ZonedeT_author = Entry(fenetre, width=30)
-ZonedeT_author.grid(row=2,column=1)
+ZonedeT_author.place(x=300,y= 90)
 
 ZonedeT_keyword = Entry(fenetre, width=30)
-ZonedeT_keyword.grid(row=3,column=1)
+ZonedeT_keyword.place(x=300,y= 110)
 
 ZonedeT_venue = Entry(fenetre, width=30)
-ZonedeT_venue.grid(row=4,column=1)
+ZonedeT_venue.place(x=300,y= 130)
 
 ZonedeT_year = Entry(fenetre, width=30)
-ZonedeT_year.grid(row=5,column=1)
+ZonedeT_year.place(x=300,y= 150)
 
 #Filtres
 #####Boutons pour la table AUTEUR
-Filtres_aut = Label(fenetre, text="Attributs AUTEUR ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
-Filtres_aut.grid(row=10,column=0)
+Filtres_aut = Label(fenetre, text="Affichage pour l'auteur",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
+Filtres_aut.place(x=50,y= 250)
 Nom_Auteur_val = IntVar()
 chk_btn_nomAuteur = Checkbutton(fenetre, text="Nom de l'Auteur", variable=Nom_Auteur_val,font = ("Arial", 9))
-chk_btn_nomAuteur.grid(row=11,column=0)
+chk_btn_nomAuteur.place(x=50,y= 270)
 
 
 #####Boutons pour la table KEYWORD
-Filtres_keyword = Label(fenetre, text="Attributs KEYWORD ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
-Filtres_keyword.grid(row=13,column=0)
+Filtres_keyword = Label(fenetre, text="Affichage pour le mot clé ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
+Filtres_keyword.place(x=50,y= 300)
 ListeKeyword_val = IntVar()
 chk_btn_ListeK = Checkbutton(fenetre, text="Mots clés", variable=ListeKeyword_val,font = ("Arial", 9 ))
-chk_btn_ListeK.grid(row=14,column=0)
-fenetre.grid_rowconfigure(12, minsize=10)
+chk_btn_ListeK.place(x=50,y= 320)
 
 
 ##### Boutons sur les années souahitée
-Filtres_annee = Label(fenetre, text="Attributs YEAR ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold") )
-Filtres_annee.grid(row=16,column=0)
+Filtres_annee = Label(fenetre, text="Affichage pour l'année ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold") )
+Filtres_annee.place(x=50,y= 350)
 choix_annee = IntVar()
 annee = Checkbutton(fenetre, text="Nom de l'Annee", variable=choix_annee,font = ("Arial", 9))
-annee.grid(row=17,column=0)
-fenetre.grid_rowconfigure(15, minsize=10)
+annee.place(x=50,y= 370)
+
 
 
 #####Boutons pour la table VENUE
-Filtres_Lieu = Label(fenetre, text="Attributs VENUE ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
-Filtres_Lieu.grid(row=19,column=0)
+Filtres_Lieu = Label(fenetre, text="Affichage pour le lieu ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
+Filtres_Lieu.place(x=50,y= 400)
 lieu_publi_val = IntVar()
 chk_btn_lieu = Checkbutton(fenetre, text="Nom du Lieu", variable=lieu_publi_val,font = ("Arial", 9))
-chk_btn_lieu.grid(row=20,column=0)
+chk_btn_lieu.place(x=50,y= 420)
 
 T_lieu_publi_val = IntVar()
 chk_btn_T_lieu = Checkbutton(fenetre, text="Type du Lieu", variable=T_lieu_publi_val,font = ("Arial", 9))
-chk_btn_T_lieu.grid(row=20,column=1)
-fenetre.grid_rowconfigure(18, minsize=10)
+chk_btn_T_lieu.place(x=290,y= 420)
 
 
 #####Boutons pour la table Publication
-Filtres_publi = Label(fenetre, text="Attributs PUBLICATION ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
-Filtres_publi.grid(row=22,column=0)
+Filtres_publi = Label(fenetre, text="Attributs pour la publication ",fg = "DodgerBlue4",font = ("Arial", 9 , "bold"))
+Filtres_publi.place(x=50,y= 450)
 NamePubli_val = IntVar()
 chk_btn_NameP = Checkbutton(fenetre, text="Titre de la Publication", variable=NamePubli_val,font = ("Arial", 9))
-chk_btn_NameP.grid(row=23,column=0)
+chk_btn_NameP.place(x=50,y= 470)
 
 categorie_val = IntVar()
 chk_btn_categorie = Checkbutton(fenetre, text="Categorie de la Publication ", variable=categorie_val,font = ("Arial", 9))
-chk_btn_categorie.grid(row=23,column=1)
+chk_btn_categorie.place(x=290,y= 470)
 
 date_publication = IntVar()
 date_Pu = Checkbutton(fenetre, text="Date de la Publication", variable=date_publication,font = ("Arial", 9))
-date_Pu.grid(row=23,column=3)
-fenetre.grid_rowconfigure(21, minsize=10)
-fenetre.grid_rowconfigure(24, minsize=10)
+date_Pu.place(x=520,y= 470)
+
+
 ##### Boutons d'entrees de valeurs
 btn_valider=Button(fenetre, text="Valider", command=btn_entree_valider)
-btn_valider.grid(row=26,column=8)
+btn_valider.place(x=640,y= 550)
 
 
 ##### Boutons QUITTER
 bouton_quitter = Button(fenetre, text="Quitter", command=fenetre.destroy)
-bouton_quitter.grid(row=25,column=8)
+bouton_quitter.place(x=640,y= 520)
+
 
 fenetre.mainloop()
 
