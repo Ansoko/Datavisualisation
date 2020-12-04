@@ -23,16 +23,6 @@ publication_year = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gesti
 publication_venue = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication_venue.csv",engine='python',error_bad_lines=False)
 publication_keyword = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication_keywords.csv",engine='python',error_bad_lines=False)
     
-authorhead = author.head(300)
-keyword_head = keyword.head(300)
-publication_head = publication.head(300)
-publication_author_head = publication_author.head(300)
-year_head = year.head(300)
-venue_head = venue.head(300)
-publication_keyword_head = publication_keyword.head(300)
-publication_year_head = publication_year.head(300)
-publication_venue_head = publication_venue.head(300)
-
 
 def add_edge(x, y, width):
     edge =  go.Scatter(x         = x,
@@ -43,9 +33,7 @@ def add_edge(x, y, width):
                        mode      = 'lines')
     return edge
 
-def afficher_Graph(nom_auteur,dataframe):
-    dataset = dataframe
-    #cols = dataframe.values
+def afficher_Graph(nom_auteur,dataset):
     cols = list()
     cols = dataset.columns.tolist()
     center_node = nom_auteur
@@ -67,7 +55,6 @@ def afficher_Graph(nom_auteur,dataframe):
 
     edge_trace = []
     
-    
     for edge in Graph.edges():
         x0, y0 = pos[edge[0]]
         x1, y1 = pos[edge[1]]
@@ -80,7 +67,7 @@ def afficher_Graph(nom_auteur,dataframe):
         edge_trace.append(current_trace)
 
 
-    node_trace = go.Scatter(x				= [],
+    node_trace = go.Scatter(x			= [],
                         	y				= [],
                         	text      		= [],
                         	textposition	= "top center",
@@ -98,11 +85,13 @@ def afficher_Graph(nom_auteur,dataframe):
     
     info = len(dataset)-1
     
+    i=-1
     for node in Graph.nodes():
-        text = ""
-        for i in range(len(dataset.columns)):
-            #text += dataset[i]
-           text += "{0}:{1},".format(dataset.columns[i],dataset[cols[i]].iloc[info])
+        i=+1
+        try:
+            text = str(dataset.iloc[i,:].values)
+        except:
+            text="txt"
         hover_text = ""
 		
         if(node == center_node):
@@ -159,5 +148,6 @@ def afficher_Graph(nom_auteur,dataframe):
     plot(fig)
     fig.show()
 
-afficher_Graph('"Johann" Sebastian Rudolph',pd.DataFrame(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub"], {"publication"})))
+res = pd.DataFrame(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub"], {"publication"}))
+afficher_Graph('"Johann" Sebastian Rudolph',res)
 

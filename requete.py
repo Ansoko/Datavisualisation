@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Nov 11 16:33:45 2020
+
 @author: david, anne-sophie
 """
 import pandas as pd
 from tkinter import Tk,Label,Button, Entry,IntVar,Checkbutton, Canvas
 
 #importation fichiers CSV
-keyword = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/keyword.csv", engine='python', error_bad_lines=False)
-publication = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication.csv", engine='python', error_bad_lines=False)
-publication_author = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication_author.csv", engine='python', error_bad_lines=False)
-publication_keywords = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication_keywords.csv", engine='python', error_bad_lines=False)
-publication_venue = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication_venue.csv", engine='python', error_bad_lines=False)
-publication_year = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/publication_year.csv", engine='python', error_bad_lines=False)
-venue = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/venue.csv", engine='python' ,error_bad_lines=False)
-year = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/year.csv", engine='python', error_bad_lines=False)
-author = pd.read_csv("D:/MasterInfo/Projet_Integre/GestionProjet/Gestion_de_projets/dataset/author.csv", engine='python', error_bad_lines=False)
+#       !! remplacer les url !!
+author = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/author.csv", engine='python', error_bad_lines=False)
+keyword = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/keyword.csv", engine='python', error_bad_lines=False)
+publication = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication.csv", engine='python', error_bad_lines=False)
+publication_author = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_author.csv", engine='python', error_bad_lines=False)
+publication_keyword = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_keywords.csv", engine='python', error_bad_lines=False)
+publication_venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_venue.csv", engine='python', error_bad_lines=False)
+publication_year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_year.csv", engine='python', error_bad_lines=False)
+venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/venue.csv", engine='python', error_bad_lines=False)
+year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.csv", engine='python', error_bad_lines=False)
 
 
 
 #requete dynamique
 donneesTable = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword, 'year':year}
-idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keywords, 'year':publication_year}
+idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keyword, 'year':publication_year}
 idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_venue', 'keyword':'keyword', 'year': 'id_year'}
     #name : liste des nom de la cible (centre du graphe)
     #typename : liste des type de la cible (author, publication, keyword, venue)
@@ -29,6 +31,7 @@ idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_ve
     #typeAtt : ensemble des types de ces attributs
 def request(name, typename, attribute, typeAtt):
     
+    #Recherche de la ligne correspondante à la première valeur de recherche
     if typename[0]=="author":
         table = author.loc[author.name_author==name[0],]
     elif typename[0]=="publication":
@@ -42,12 +45,15 @@ def request(name, typename, attribute, typeAtt):
     else:
         return print("Erreur : le type d'entrée n'existe pas")
     
+    #Association avec la table ID
     table = pd.merge(table, idTable[typename[0]], on=idName[typename[0]])
+
+    #Suppression du nom de la table dans les différentes listes. Cela évitera de rechercher les valeurs dans les tables.
     typeAtt.discard(typename[0])
     del typename[0]
     del name[0]
     
-    #enfin, on merge les lignes correspondantes à la recherche
+    #Merge cette ligne avec les tables correspondantes à la recherche
     for typ in typeAtt:
         if typ!="publication":
             table = pd.merge(table, idTable[typ], on='id_publication') 
@@ -56,6 +62,7 @@ def request(name, typename, attribute, typeAtt):
             del typename[typename.index(typ)]
             del name[typename.index(typ)]
         
+    #Séléction plus précise des données avec les autres valeurs de recherche (s'il y en a plus que 1)
     for i in range(len(typename)):
         if typename[i]=="author":
             val = author.loc[author.name_author==name[i],]
@@ -72,9 +79,10 @@ def request(name, typename, attribute, typeAtt):
         table = pd.merge(table, idTable[typename[i]], on='id_publication')
         table = pd.merge(table, val, on=idName[typename[i]])
 
+    #retour des attributs demandés
     return table[attribute]
 
-#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub"], {"publication"}))
+#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "keyword"], {"publication", "keyword"}))
 #print(request(["Sebastian Rudolph", "2018"], ["author", "year"], ["keyword"], {"keyword"}))
 
 def btn_entree_valider():
@@ -245,7 +253,7 @@ bouton_quitter = Button(fenetre, text="Quitter", command=fenetre.destroy)
 bouton_quitter.place(x=640,y= 520)
 
 
-fenetre.mainloop()
+#fenetre.mainloop()
 
 #Exemple de nom d'auteur : Sebastian Rudolph, A. Antony Franklin
 #Exemple de nom de publication : Self Functional Maps.
