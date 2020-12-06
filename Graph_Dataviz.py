@@ -15,16 +15,18 @@ keyword = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/key
 publication = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication.csv", engine='python', error_bad_lines=False)
 publication_author = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_author.csv", engine='python', error_bad_lines=False)
 publication_keyword = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_keywords.csv", engine='python', error_bad_lines=False)
-publication_venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_venue.csv", engine='python', error_bad_lines=False)
+#publication_venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_venue.csv", engine='python', error_bad_lines=False)
 publication_year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/publication_year.csv", engine='python', error_bad_lines=False)
-venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/venue.csv", engine='python', error_bad_lines=False)
+#venue = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/venue.csv", engine='python', error_bad_lines=False)
 year = pd.read_csv("C:/Users/annes/OneDrive/cours/Master 1/Projet/dataset/year.csv", engine='python', error_bad_lines=False)
+
 
 ##### REQUETES #####
 #requete dynamique
-donneesTable = {'author': author, 'publication': publication, 'venue':venue, 'keyword':keyword, 'year':year}
-idTable = {'author': publication_author, 'publication': publication, 'venue':publication_venue, 'keyword':publication_keyword, 'year':publication_year}
-idName = {'author': 'id_author', 'publication': 'id_publication', 'venue':'id_venue', 'keyword':'keyword', 'year': 'id_year'}
+donneesTable = {'author': author, 'publication': publication, 'keyword':keyword, 'year':year}
+idTable = {'author': publication_author, 'publication': publication, 'keyword':publication_keyword, 'year':publication_year}
+idName = {'author': 'id_author', 'publication': 'id_publication', 'keyword':'keyword', 'year': 'id_year'}
+donneesName = {'author': 'name_author', 'publication': 'article_title', 'keyword':'keyword', 'year': 'year'}
     #name : liste des nom de la cible (centre du graphe)
     #typename : liste des type de la cible (author, publication, keyword, venue)
     #attribute : liste d'attributs à afficher
@@ -38,25 +40,27 @@ def request(name, typename, attribute, typeAtt):
         table = publication.loc[publication.article_title==name[0],]
     elif typename[0] == "keyword":
         table = keyword.loc[keyword.keyword==name[0],]
-    elif typename[0]== "venue":
-        table = venue.loc[venue.name_venue==name[0],]
     elif typename[0] == "year":
         table = year.loc[year.year==int(name[0]),]
     else:
         return print("Erreur : le type d'entrée n'existe pas")
     
-    #Association avec la table ID
+    #Association avec la table ID et la table publication
     table = pd.merge(table, idTable[typename[0]], on=idName[typename[0]])
+    #table = pd.merge(table, publication, on='id_publication')
 
     #Suppression du nom de la table dans les différentes listes. Cela évitera de rechercher les valeurs dans les tables.
-    typeAtt.discard(typename[0])
+    intoTable = [typename[0], "publication"]
     del typename[0]
     del name[0]
     
     #Merge cette ligne avec les tables correspondantes à la recherche
     for typ in typeAtt:
         if typ!="publication":
-            table = pd.merge(table, idTable[typ], on='id_publication') 
+            if (typ in intoTable):
+                del table[idName[typ]]
+                del table[donneesName[typ]]
+            table = pd.merge(table, idTable[typ], on='id_publication')
         table = pd.merge(table, donneesTable[typ],on=idName[typ])
         if (typ in typename):
             del typename[typename.index(typ)]
@@ -70,8 +74,6 @@ def request(name, typename, attribute, typeAtt):
             val = publication.loc[publication.article_title==name[i],]
         elif typename[i] == "keyword":
             val = keyword.loc[keyword.keyword==name[i],]
-        elif typename[i]== "venue":
-            val = venue.loc[venue.name_venue==name[i],]
         elif typename[i] == "year":
             val = year.loc[year.year==int(name[i]),]
         else:
@@ -85,8 +87,7 @@ def request(name, typename, attribute, typeAtt):
 #####GRAPHE#####
 #couleur du graphe
 import random
-colors = ('blue', 'green', 'violet', 'yellow', 'cyan', 'orange', 'magenta')
-
+colors = ('blue', 'green', 'violet', 'yellow', 'cyan', 'orange', 'magenta','red','lightgreen','lightblue','grey')
 def add_edge(x, y, width):
     edge =  go.Scatter(x         = x,
                        y         = y,
@@ -101,11 +102,11 @@ def afficher_Graph(recherche,dataset):
     #création du graphe
     Graph = nx.Graph()
     
-        #ajout du noeud central
-    center_node = str(recherche)
+    #ajout du noeud central
+    center_node = recherche
     Graph.add_node(center_node, size = 15) 
     
-        #ajout des noeuds du niveau 1
+    #ajout des noeuds du niveau 1
     nbr_nodes = len(dataset)-1      #nombre de noeuds
     nodes_title = [nbr for nbr in range(nbr_nodes)]
     node_w = 6                      #taille des noeuds
@@ -121,15 +122,15 @@ def afficher_Graph(recherche,dataset):
     for edge in Graph.edges():
         x0, y0 = pos[edge[0]]
         x1, y1 = pos[edge[1]]
-        current_trace = add_edge(
+        trace = add_edge(
 								[x0, x1, None],
 								[y0, y1, None],
 								width = 2
 								)
 
-        edge_trace.append(current_trace)
+        edge_trace.append(trace)
 
-
+    # ajouter les caractéristiques des éléments du graphe
     node_trace = go.Scatter(x			= [],
                         	y				= [],
                         	text      		= [],
@@ -142,13 +143,15 @@ def afficher_Graph(recherche,dataset):
                                          		line=dict(color='black', width=1
             )))
     
-    annotations = []
+    infos_nodes = []
     
     info = len(dataset)-1
     
     i=-1
     firstElem = dataset.iloc[0,0]
     color = tuple(['red'])
+    
+    # Boucle sur les noeuds pour jouer sur leurs caractéristiques.
     for node in Graph.nodes():
         i=i+1
         try:
@@ -156,9 +159,9 @@ def afficher_Graph(recherche,dataset):
         except:
             text="txt"
         hover_text = ""
-		
+	# Condition pour ajouter des paramètres en fonction du type de noeud: central, autres	
         if(node == center_node):
-            hover_text = tuple(["{0}".format(center_node)])
+            hover_text = tuple([recherche])
             color = tuple(['blue'])
             size = tuple([2 * Graph.nodes[node]['size']])
         else:
@@ -174,12 +177,10 @@ def afficher_Graph(recherche,dataset):
         node_trace['marker']['color'] += color
         node_trace['marker']['size'] += size
         node_trace['text'] += tuple([hover_text])
-        annotations.append(
+        infos_nodes.append(
  		  dict(x=x,
                	 y=y,
-                 	 text="<b> " + str(node) + "</b>",
-                 	 xanchor='left',
-                     titleside='right',
+                 	 text=str(node),
                 	 xshift=10,
                  	 font=dict(color='black', size=10),
                  	 showarrow=False)
@@ -188,28 +189,26 @@ def afficher_Graph(recherche,dataset):
         layout = go.Layout(
      	paper_bgcolor='rgba(0,0,0,0)',
      	plot_bgcolor='rgba(0,0,0,0)', 
-     	xaxis =  {'showgrid': False, 'zeroline': False},
-     	yaxis = {'showgrid': False, 'zeroline': False}, 
+     	xaxis =  {'showgrid': False, 'zeroline': False,'showticklabels': False},
+     	yaxis = {'showgrid': False, 'zeroline': False, 'showticklabels': False}, 
 	)
     info = info - 1
     
     
-    # creation de la figure du layout 
+    # creation de la figure
     fig = go.Figure(layout = layout)
     fig.update_layout(
+        title_text="DataViz 2 - Graphe de visualisation",
+        titlefont_size=20,
         hoverlabel=dict(
             font_size=13,
-            font_family="Rockwell"
+            font_family="Calibri"
         )
     )
-    
+    #ajout des élements (noeuds et arêtes) dans la figure et affichage du graphe
     for trace in edge_trace:
         fig.add_trace(trace)
     fig.add_trace(node_trace)
-    fig.update_layout(showlegend = False)
-
-    fig.update_xaxes(showticklabels = False)
-    fig.update_yaxes(showticklabels = False)
     plot(fig)
     fig.show()
 
@@ -235,9 +234,12 @@ def btn_entree_valider():
     att=[]
     typeAtt = set()
     set_att_typeAtt_from_intf(att, typeAtt)
+    recherche=""
+    for elem in name:
+        recherche = recherche + elem + ", "
     #print(request(name, typename, att, typeAtt))
     res = pd.DataFrame(request(name, typename, att, typeAtt))
-    afficher_Graph(str(name),res)
+    afficher_Graph(recherche, res.drop_duplicates())
         
         
 #fonction qui permet remplir les parametres att et typeAtt selon le choix de l'user dans l'interface
@@ -387,10 +389,7 @@ fenetre.mainloop()
 #Exemple de nom d'auteur : Sebastian Rudolph, A. Antony Franklin
 #Exemple de nom de publication : Self Functional Maps.
 #ºExemple de nom venue : 3D-GIS
-#print(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "keyword"], {"publication", "keyword"}))
-#print(request(["Sebastian Rudolph", "2018"], ["author", "year"], ["keyword"], {"keyword"}))
-afficher_Graph(str(["A. Antony Franklin", "2018"]),pd.DataFrame(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "keyword"], {"publication", "keyword"})))
-
-#executable
-print("started")
-input()
+#res=pd.DataFrame(request(["A. Antony Franklin"], ["author"], ["keyword"], {"keyword"}))
+#print(res.drop_duplicates())
+#print(request(["Sebastian Rudolph", "2018"], ["author", "year"], ["name_author"], {"author"}))
+#afficher_Graph(str(["A. Antony Franklin", "2018"]),pd.DataFrame(request(["A. Antony Franklin", "2018"], ["author", "year"], ["date_pub", "keyword"], {"publication", "keyword"})))
